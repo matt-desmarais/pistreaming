@@ -11,6 +11,7 @@ from threading import Thread
 from time import sleep, time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from wsgiref.simple_server import make_server
+import datetime as dt
 
 import picamera
 from ws4py.websocket import WebSocket
@@ -162,6 +163,39 @@ def main():
             print('Starting broadcast thread')
             broadcast_thread.start()
             while True:
+                overlayString = ""
+
+                tfile = open("/sys/bus/w1/devices/w1_bus_master1/28-0417837f42ff/w1_slave")
+                text1 = tfile.read()
+                tfile.close()
+                tempdata1 = text1.split()[-1]
+                temp1 = float(tempdata1[2:])
+                temp1 = temp1 / 1000
+                temp1 = '%6.2f'%temp1
+
+                tfile2 = open("/sys/bus/w1/devices/w1_bus_master1/28-0517908cbdff/w1_slave")
+                text2 = tfile2.read()
+                tfile2.close()
+                tempdata2 = text2.split()[-1]
+                temp2 = float(tempdata2[2:])
+                temp2 = temp2 / 1000
+                temp2 = '%6.2f'%temp2
+
+                tfile3 = open("/sys/bus/w1/devices/w1_bus_master1/28-051790b51aff/w1_slave")
+                text3 = tfile3.read()
+                tfile3.close()
+                tempdata3 = text3.split()[-1]
+                temp3 = float(tempdata3[2:])
+                temp3 = temp3 / 1000
+                temp3 = '%6.2f'%temp3
+
+                overlayString += 'BED1: '+str(temp1)+'C\n'
+                overlayString += ' ROOM: '+str(temp2)+'C\n'
+                overlayString += ' BED2: '+str(temp3)+'C\n'
+                overlayString += ' CPU '+str(cpu_temp())
+                camera.annotate_text_size = 20
+                #camera.annotate_text = "I am what I am" 
+                camera.annotate_text = dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 camera.wait_recording(1)
         except KeyboardInterrupt:
             pass
